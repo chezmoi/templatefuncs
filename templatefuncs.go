@@ -29,6 +29,8 @@ func NewFuncMap() template.FuncMap {
 		"comment":          commentTemplateFunc,
 		"contains":         reverseArgs2(strings.Contains),
 		"eqFold":           eqFoldTemplateFunc,
+		"hasPrefix":        reverseArgs2(strings.HasPrefix),
+		"hasSuffix":        reverseArgs2(strings.HasSuffix),
 		"fromJSON":         eachByteSliceErr(fromJSONTemplateFunc),
 		"hexDecode":        eachStringErr(hex.DecodeString),
 		"hexEncode":        eachByteSlice(hex.EncodeToString),

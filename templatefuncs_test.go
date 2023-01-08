@@ -92,6 +92,22 @@ func TestFuncMap(t *testing.T) {
 			expected: "0",
 		},
 		{
+			template: `{{ "ab" | hasPrefix "a" }}`,
+			expected: "true",
+		},
+		{
+			template: `{{ "ab" | hasPrefix "b" }}`,
+			expected: "false",
+		},
+		{
+			template: `{{ "ab" | hasSuffix "a" }}`,
+			expected: "false",
+		},
+		{
+			template: `{{ "ab" | hasSuffix "b" }}`,
+			expected: "true",
+		},
+		{
 			template: `{{ (lstat "testdata/file").type }}`,
 			expected: "file",
 		},
