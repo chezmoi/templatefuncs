@@ -44,7 +44,6 @@ func NewFuncMap() template.FuncMap {
 		"toJSON":           toJSONTemplateFunc,
 		"toLower":          eachString(strings.ToLower),
 		"toString":         toStringTemplateFunc,
-		"toTitle":          eachString(strings.ToTitle),
 		"toUpper":          eachString(strings.ToUpper),
 		"trimSpace":        eachString(strings.TrimSpace),
 	}
