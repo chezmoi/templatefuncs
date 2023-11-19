@@ -26,18 +26,18 @@ var fileModeTypeNames = map[fs.FileMode]string{
 
 func NewFuncMap() template.FuncMap {
 	return template.FuncMap{
-		"comment":          commentTemplateFunc,
 		"contains":         reverseArgs2(strings.Contains),
 		"eqFold":           eqFoldTemplateFunc,
+		"fromJSON":         eachByteSliceErr(fromJSONTemplateFunc),
 		"hasPrefix":        reverseArgs2(strings.HasPrefix),
 		"hasSuffix":        reverseArgs2(strings.HasSuffix),
-		"fromJSON":         eachByteSliceErr(fromJSONTemplateFunc),
 		"hexDecode":        eachStringErr(hex.DecodeString),
 		"hexEncode":        eachByteSlice(hex.EncodeToString),
 		"join":             reverseArgs2(strings.Join),
 		"list":             listTemplateFunc,
 		"lookPath":         eachStringErr(lookPathTemplateFunc),
 		"lstat":            eachString(lstatTemplateFunc),
+		"prefixLines":      prefixLinesTemplateFunc,
 		"quote":            eachString(strconv.Quote),
 		"regexpReplaceAll": regexpReplaceAllTemplateFunc,
 		"stat":             eachString(statTemplateFunc),
@@ -49,7 +49,7 @@ func NewFuncMap() template.FuncMap {
 	}
 }
 
-func commentTemplateFunc(prefix, s string) string {
+func prefixLinesTemplateFunc(prefix, s string) string {
 	type stateType int
 	const (
 		startOfLine stateType = iota
