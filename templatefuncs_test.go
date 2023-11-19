@@ -53,21 +53,6 @@ func TestFuncMap(t *testing.T) {
 	}{
 		{},
 		{
-			template: `{{ comment "# " "a" }}`,
-			expected: `# a`,
-		},
-		{
-			template: `{{ comment "# " . }}`,
-			data: joinLines(
-				"a",
-				"b",
-			),
-			expected: joinLines(
-				"# a",
-				"# b",
-			),
-		},
-		{
 			template: `{{ "abc" | contains "bc" }}`,
 			expected: "true",
 		},
@@ -108,20 +93,35 @@ func TestFuncMap(t *testing.T) {
 			expected: "true",
 		},
 		{
-			template: `{{ (lstat "testdata/file").type }}`,
-			expected: "file",
-		},
-		{
-			template: `{{ quote "a" }}`,
-			expected: `"a"`,
-		},
-		{
 			template: `{{ list "a" "b" "c" | quote | join "," }}`,
 			expected: `"a","b","c"`,
 		},
 		{
 			template: `{{ (lstat "testdata/file").type }}`,
 			expected: "file",
+		},
+		{
+			template: `{{ (lstat "testdata/file").type }}`,
+			expected: "file",
+		},
+		{
+			template: `{{ prefixLines "# " "a" }}`,
+			expected: `# a`,
+		},
+		{
+			template: `{{ prefixLines "# " . }}`,
+			data: joinLines(
+				"a",
+				"b",
+			),
+			expected: joinLines(
+				"# a",
+				"# b",
+			),
+		},
+		{
+			template: `{{ quote "a" }}`,
+			expected: `"a"`,
 		},
 		{
 			template: `{{ (stat "testdata/file").type }}`,
