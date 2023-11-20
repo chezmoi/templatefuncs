@@ -6,8 +6,7 @@ import (
 	"testing"
 	"text/template"
 
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
+	"github.com/alecthomas/assert/v2"
 )
 
 func TestEachString(t *testing.T) {
@@ -138,11 +137,11 @@ func TestFuncMap(t *testing.T) {
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			tmpl, err := template.New("").Funcs(funcMap).Parse(tc.template)
-			require.NoError(t, err)
-			require.NotNil(t, tmpl)
+			assert.NoError(t, err)
+			assert.NotZero(t, tmpl)
 
 			var actual strings.Builder
-			require.NoError(t, tmpl.Execute(&actual, tc.data))
+			assert.NoError(t, tmpl.Execute(&actual, tc.data))
 			assert.Equal(t, tc.expected, actual.String())
 		})
 	}
