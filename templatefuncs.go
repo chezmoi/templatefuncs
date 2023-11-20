@@ -166,7 +166,7 @@ func toStringTemplateFunc(arg any) string {
 	case float32:
 		return strconv.FormatFloat(float64(arg), 'f', -1, 32)
 	case float64:
-		return strconv.FormatFloat(float64(arg), 'f', -1, 64)
+		return strconv.FormatFloat(arg, 'f', -1, 64)
 	case int:
 		return strconv.Itoa(arg)
 	case int32:
