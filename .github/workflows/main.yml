@@ -21,3 +21,13 @@ jobs:
     - uses: golangci/golangci-lint-action@3a919529898de77ec3da873e3063ca4b10e7f5cc
       with:
         version: v1.55.2
+    - uses: DavidAnson/markdownlint-cli2-action@510b996878fc0d1a46c8a04ec86b06dbfba09de7
+      with:
+        globs: '**/*.md'
+    - uses: editorconfig-checker/action-editorconfig-checker@d2ed4fd072ae6f887e9407c909af0f585d2ad9f4
+    - run: editorconfig-checker
+    - name: actionlint
+      run: |
+        bash <(curl https://raw.githubusercontent.com/rhysd/actionlint/main/scripts/download-actionlint.bash)
+        ./actionlint -color
+      shell: bash
