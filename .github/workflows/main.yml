@@ -18,7 +18,7 @@ jobs:
     steps:
     - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11
     - uses: actions/setup-go@0c52d547c9bc32b1aa3301fd7a9cb496313a4491
-    - uses: golangci/golangci-lint-action@3a919529898de77ec3da873e3063ca4b10e7f5cc
+    - uses: golangci/golangci-lint-action@3cfe3a4abbb849e10058ce4af15d205b6da42804
       with:
         version: v1.55.2
     - uses: DavidAnson/markdownlint-cli2-action@510b996878fc0d1a46c8a04ec86b06dbfba09de7
