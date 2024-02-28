@@ -138,3 +138,6 @@ issues:
   - linters:
     - goerr113
     text: do not define dynamic errors, use wrapped static errors instead
+  - linters:
+    - gochecknoinits
+    path: "docs/docs.go"
