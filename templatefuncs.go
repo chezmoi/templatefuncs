@@ -43,12 +43,17 @@ func NewFuncMap() template.FuncMap {
 		"prefixLines":      prefixLinesTemplateFunc,
 		"quote":            eachString(strconv.Quote),
 		"regexpReplaceAll": regexpReplaceAllTemplateFunc,
-		"stat":             eachString(statTemplateFunc),
-		"toJSON":           toJSONTemplateFunc,
-		"toLower":          eachString(strings.ToLower),
-		"toString":         toStringTemplateFunc,
-		"toUpper":          eachString(strings.ToUpper),
-		"trimSpace":        eachString(strings.TrimSpace),
+		"replaceAll": func(old, new_ string, v any) any {
+			return eachString(func(s string) any {
+				return strings.ReplaceAll(s, old, new_)
+			})(v)
+		},
+		"stat":      eachString(statTemplateFunc),
+		"toJSON":    toJSONTemplateFunc,
+		"toLower":   eachString(strings.ToLower),
+		"toString":  toStringTemplateFunc,
+		"toUpper":   eachString(strings.ToUpper),
+		"trimSpace": eachString(strings.TrimSpace),
 	}
 }
 
