@@ -123,6 +123,10 @@ func TestFuncMap(t *testing.T) {
 			expected: `adcda`,
 		},
 		{
+			template: `{{ list "abc" "cba" | replaceAll "b" "d" }}`,
+			expected: "[adc cda]",
+		},
+		{
 			template: `{{ quote "a" }}`,
 			expected: `"a"`,
 		},
