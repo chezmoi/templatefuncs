@@ -14,6 +14,7 @@ import (
 	"text/template"
 )
 
+// fileModeTypeNames maps file mode types to human-readable strings.
 var fileModeTypeNames = map[fs.FileMode]string{
 	0:                 "file",
 	fs.ModeDir:        "dir",
@@ -24,6 +25,8 @@ var fileModeTypeNames = map[fs.FileMode]string{
 	fs.ModeCharDevice: "char device",
 }
 
+// NewFuncMap returns a new [text/template.FuncMap] containing all template
+// functions.
 func NewFuncMap() template.FuncMap {
 	return template.FuncMap{
 		"contains":         reverseArgs2(strings.Contains),
@@ -49,6 +52,8 @@ func NewFuncMap() template.FuncMap {
 	}
 }
 
+// prefixLinesTemplateFunc is the core implementation of the `prefixLines`
+// template function.
 func prefixLinesTemplateFunc(prefix, s string) string {
 	type stateType int
 	const (
@@ -83,6 +88,8 @@ func prefixLinesTemplateFunc(prefix, s string) string {
 	return builder.String()
 }
 
+// eqFoldTemplateFunc is the core implementation of the `eqFold` template
+// function.
 func eqFoldTemplateFunc(first, second string, more ...string) bool {
 	if strings.EqualFold(first, second) {
 		return true
@@ -95,6 +102,8 @@ func eqFoldTemplateFunc(first, second string, more ...string) bool {
 	return false
 }
 
+// fromJSONTemplateFunc is the core implementation of the `fromJSON` template
+// function.
 func fromJSONTemplateFunc(data []byte) (any, error) {
 	var result any
 	if err := json.Unmarshal(data, &result); err != nil {
@@ -103,10 +112,13 @@ func fromJSONTemplateFunc(data []byte) (any, error) {
 	return result, nil
 }
 
+// listTemplateFunc is the core implementation of the `list` template function.
 func listTemplateFunc(args ...any) []any {
 	return args
 }
 
+// lookPathTemplateFunc is the core implementation of the `lookPath` template
+// function.
 func lookPathTemplateFunc(file string) (string, error) {
 	switch path, err := exec.LookPath(file); {
 	case err == nil:
@@ -120,6 +132,8 @@ func lookPathTemplateFunc(file string) (string, error) {
 	}
 }
 
+// lstatTemplateFunc is the core implementation of the `lstat` template
+// function.
 func lstatTemplateFunc(name string) any {
 	switch fileInfo, err := os.Lstat(name); {
 	case err == nil:
@@ -131,10 +145,13 @@ func lstatTemplateFunc(name string) any {
 	}
 }
 
+// regexpReplaceAllTemplateFunc is the core implementation of the
+// `regexpReplaceAll` template function.
 func regexpReplaceAllTemplateFunc(expr, repl, s string) string {
 	return regexp.MustCompile(expr).ReplaceAllString(s, repl)
 }
 
+// statTemplateFunc is the core implementation of the `stat` template function.
 func statTemplateFunc(name string) any {
 	switch fileInfo, err := os.Stat(name); {
 	case err == nil:
@@ -146,6 +163,8 @@ func statTemplateFunc(name string) any {
 	}
 }
 
+// toJSONTemplateFunc is the core implementation of the `toJSON` template
+// function.
 func toJSONTemplateFunc(arg any) []byte {
 	data, err := json.Marshal(arg)
 	if err != nil {
@@ -154,6 +173,8 @@ func toJSONTemplateFunc(arg any) []byte {
 	return data
 }
 
+// toStringTemplateFunc is the core implementation of the `toString` template
+// function.
 func toStringTemplateFunc(arg any) string {
 	// FIXME add more types
 	switch arg := arg.(type) {
@@ -178,6 +199,9 @@ func toStringTemplateFunc(arg any) string {
 	}
 }
 
+// eachByteSlice transforms a function that takes a single `[]byte` and returns
+// a `T` to a function that takes zero or more `[]byte`-like arguments and
+// returns zero or more `T`s.
 func eachByteSlice[T any](f func([]byte) T) func(any) any {
 	return func(arg any) any {
 		switch arg := arg.(type) {
@@ -203,6 +227,9 @@ func eachByteSlice[T any](f func([]byte) T) func(any) any {
 	}
 }
 
+// eachByteSliceErr transforms a function that takes a single `[]byte` and
+// returns a `T` and an `error` into a function that takes zero or more
+// `[]byte`-like arguments and returns zero or more `Ts` and an error.
 func eachByteSliceErr[T any](f func([]byte) (T, error)) func(any) any {
 	return func(arg any) any {
 		switch arg := arg.(type) {
@@ -244,6 +271,9 @@ func eachByteSliceErr[T any](f func([]byte) (T, error)) func(any) any {
 	}
 }
 
+// eachString transforms a function that takes a single `string`-like argument
+// and returns a `T` into a function that takes zero or more `string`-like
+// arguments and returns zero or more `T`s.
 func eachString[T any](f func(string) T) func(any) any {
 	return func(arg any) any {
 		switch arg := arg.(type) {
@@ -282,6 +312,9 @@ func eachString[T any](f func(string) T) func(any) any {
 	}
 }
 
+// eachStringErr transforms a function that takes a single `string`-like argument
+// and returns a `T` and an `error` into a function that takes zero or more
+// `string`-like arguments and returns zero or more `T`s and an `error`.
 func eachStringErr[T any](f func(string) (T, error)) func(any) any {
 	return func(arg any) any {
 		switch arg := arg.(type) {
@@ -323,6 +356,7 @@ func eachStringErr[T any](f func(string) (T, error)) func(any) any {
 	}
 }
 
+// fileInfoToMap returns a `map[string]any` of `fileInfo`'s fields.
 func fileInfoToMap(fileInfo fs.FileInfo) map[string]any {
 	return map[string]any{
 		"name":    fileInfo.Name(),
@@ -335,6 +369,9 @@ func fileInfoToMap(fileInfo fs.FileInfo) map[string]any {
 	}
 }
 
+// reverseArgs2 transforms a function that takes two arguments and returns an
+// `R` into a function that takes the arguments in reverse order and returns an
+// `R`.
 func reverseArgs2[T1, T2, R any](f func(T1, T2) R) func(T2, T1) R {
 	return func(arg1 T2, arg2 T1) R {
 		return f(arg2, arg1)
