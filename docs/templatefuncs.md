@@ -61,7 +61,7 @@ foobar
 
 ## `hexEncode` *string*
 
-`hexEncode` returns the hexidecimal encoding of *string*.
+`hexEncode` returns the hexadecimal encoding of *string*.
 
 ```text
 {{ hexEncode "foobar" }}
