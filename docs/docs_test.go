@@ -10,6 +10,7 @@ import (
 
 func TestReferences(t *testing.T) {
 	assert.Equal(t, docs.Reference{
+		Type:  "String",
 		Title: "`contains` *substring* *string*",
 		Body:  "`contains` returns whether *substring* is in *string*.",
 		Example: "" +
@@ -20,12 +21,16 @@ func TestReferences(t *testing.T) {
 			"```",
 	}, docs.References["contains"])
 	assert.Equal(t, docs.Reference{
-		Title: "`trimSpace` *string*",
-		Body:  "`trimSpace` returns *string* with all spaces removed.",
-		Example: "```text\n" +
-			"{{ \"    foobar    \" | trimSpace }}\n" +
+		Type:  "Boolean",
+		Title: "`eqFold` *string1* *string2* [*extraStrings*...]",
+		Body: "" +
+			"`eqFold` returns the boolean truth of comparing *string1* with *string2*\n" +
+			"and any number of *extraStrings* under Unicode case-folding.",
+		Example: "" +
+			"```text\n" +
+			"{{ eqFold \"föö\" \"FOO\" }}\n" +
 			"\n" +
-			"foobar\n" +
+			"true\n" +
 			"```",
-	}, docs.References["trimSpace"])
+	}, docs.References["eqFold"])
 }

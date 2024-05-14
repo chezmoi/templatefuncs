@@ -1,44 +1,75 @@
 package docs
 
 import (
-	_ "embed"
+	"embed"
+	"log"
+	"maps"
 	"regexp"
 	"strings"
 )
 
-//go:embed templatefuncs.md
-var templateFuncsStr string
-
 type Reference struct {
+	Type    string
 	Title   string
 	Body    string
 	Example string
 }
 
-var References map[string]Reference
+//go:embed *.md
+var f embed.FS
 
-func init() {
-	newlineRx := regexp.MustCompile(`\r?\n`)
+var (
+	References map[string]Reference
 
+	newlineRx   = regexp.MustCompile(`\r?\n`)
+	pageTitleRx = regexp.MustCompile(`^#\s+(\S+)`)
 	// Template function names must start with a letter or underscore
 	// and can subsequently contain letters, underscores and digits.
-	funcNameRx := regexp.MustCompile("`" + `([a-zA-Z_]\w*)` + "`")
+	funcNameRx = regexp.MustCompile("`" + `([a-zA-Z_]\w*)` + "`")
+)
 
-	References = make(map[string]Reference)
+func readFiles() []string {
+	fileContents := []string{}
+
+	fileInfos, err := f.ReadDir(".")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	for _, fileInfo := range fileInfos {
+		if fileInfo.IsDir() || !strings.HasSuffix(fileInfo.Name(), ".md") {
+			continue
+		}
+		content, err := f.ReadFile(fileInfo.Name())
+		if err != nil {
+			log.Fatal(err)
+		}
+		fileContents = append(fileContents, string(content))
+	}
+
+	return fileContents
+}
+
+func parseFile(file string) map[string]Reference {
+	references := make(map[string]Reference)
 	var reference Reference
 	var funcName string
 	var b strings.Builder
 	var e strings.Builder
 	inExample := false
 
-	for _, line := range newlineRx.Split(templateFuncsStr, -1) {
+	lines := newlineRx.Split(file, -1)
+	funcType, lines := pageTitleRx.FindStringSubmatch(lines[0])[1], lines[1:]
+
+	for _, line := range lines {
 		switch {
 		case strings.HasPrefix(line, "## "):
 			if reference.Title != "" {
-				References[funcName] = reference
+				references[funcName] = reference
 			}
 			funcName = funcNameRx.FindStringSubmatch(line)[1]
 			reference = Reference{}
+			reference.Type = funcType
 			reference.Title = strings.TrimPrefix(line, "## ")
 		case strings.HasPrefix(line, "```"):
 			if !inExample {
@@ -63,6 +94,18 @@ func init() {
 	}
 
 	if reference.Title != "" {
-		References[funcName] = reference
+		references[funcName] = reference
+	}
+
+	return references
+}
+
+func init() {
+	References = make(map[string]Reference)
+
+	files := readFiles()
+
+	for _, file := range files {
+		maps.Copy(References, parseFile(file))
 	}
 }
