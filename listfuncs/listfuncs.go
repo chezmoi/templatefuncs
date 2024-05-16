@@ -4,13 +4,15 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/chezmoi/templatefuncs/internal/utils"
+	"github.com/chezmoi/templatefuncs/internal/transform"
 )
 
-var FuncMap = template.FuncMap{
-	"join":        utils.ReverseArgs2(strings.Join),
-	"list":        listTemplateFunc,
-	"prefixLines": prefixLinesTemplateFunc,
+func NewFuncMap() template.FuncMap {
+	return template.FuncMap{
+		"join":        transform.ReverseArgs2(strings.Join),
+		"list":        listTemplateFunc,
+		"prefixLines": prefixLinesTemplateFunc,
+	}
 }
 
 // listTemplateFunc is the core implementation of the `list` template function.

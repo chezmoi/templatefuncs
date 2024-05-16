@@ -5,8 +5,10 @@ import (
 	"text/template"
 )
 
-var FuncMap = template.FuncMap{
-	"eqFold": eqFoldTemplateFunc,
+func NewFuncMap() template.FuncMap {
+	return template.FuncMap{
+		"eqFold": eqFoldTemplateFunc,
+	}
 }
 
 // eqFoldTemplateFunc is the core implementation of the `eqFold` template

@@ -3,7 +3,6 @@ package docs
 import (
 	"embed"
 	"log"
-	"maps"
 	"regexp"
 	"strings"
 )
@@ -37,9 +36,6 @@ func readFiles() []string {
 	}
 
 	for _, fileInfo := range fileInfos {
-		if fileInfo.IsDir() || !strings.HasSuffix(fileInfo.Name(), ".md") {
-			continue
-		}
 		content, err := f.ReadFile(fileInfo.Name())
 		if err != nil {
 			log.Fatal(err)
@@ -51,7 +47,6 @@ func readFiles() []string {
 }
 
 func parseFile(file string) map[string]Reference {
-	references := make(map[string]Reference)
 	var reference Reference
 	var funcName string
 	var b strings.Builder
@@ -59,13 +54,14 @@ func parseFile(file string) map[string]Reference {
 	inExample := false
 
 	lines := newlineRx.Split(file, -1)
-	funcType, lines := pageTitleRx.FindStringSubmatch(lines[0])[1], lines[1:]
+	funcType := pageTitleRx.FindStringSubmatch(lines[0])[1]
+	lines = lines[1:]
 
 	for _, line := range lines {
 		switch {
 		case strings.HasPrefix(line, "## "):
 			if reference.Title != "" {
-				references[funcName] = reference
+				References[funcName] = reference
 			}
 			funcName = funcNameRx.FindStringSubmatch(line)[1]
 			reference = Reference{}
@@ -94,10 +90,10 @@ func parseFile(file string) map[string]Reference {
 	}
 
 	if reference.Title != "" {
-		references[funcName] = reference
+		References[funcName] = reference
 	}
 
-	return references
+	return References
 }
 
 func init() {
@@ -106,6 +102,6 @@ func init() {
 	files := readFiles()
 
 	for _, file := range files {
-		maps.Copy(References, parseFile(file))
+		parseFile(file)
 	}
 }

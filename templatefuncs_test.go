@@ -8,7 +8,7 @@ import (
 
 	"github.com/alecthomas/assert/v2"
 
-	"github.com/chezmoi/templatefuncs/internal/utils"
+	"github.com/chezmoi/templatefuncs/internal/transform"
 )
 
 func TestEachString(t *testing.T) {
@@ -39,7 +39,7 @@ func TestEachString(t *testing.T) {
 		},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			f := utils.EachString(tc.f)
+			f := transform.EachString(tc.f)
 			assert.Equal(t, tc.expected, f(tc.arg))
 		})
 	}
