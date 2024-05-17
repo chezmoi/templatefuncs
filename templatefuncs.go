@@ -52,42 +52,6 @@ func NewFuncMap() template.FuncMap {
 	}
 }
 
-// prefixLinesTemplateFunc is the core implementation of the `prefixLines`
-// template function.
-func prefixLinesTemplateFunc(prefix, s string) string {
-	type stateType int
-	const (
-		startOfLine stateType = iota
-		inLine
-	)
-
-	state := startOfLine
-	var builder strings.Builder
-	builder.Grow(2 * len(s))
-	for _, r := range s {
-		switch state {
-		case startOfLine:
-			if _, err := builder.WriteString(prefix); err != nil {
-				panic(err)
-			}
-			if _, err := builder.WriteRune(r); err != nil {
-				panic(err)
-			}
-			if r != '\n' {
-				state = inLine
-			}
-		case inLine:
-			if _, err := builder.WriteRune(r); err != nil {
-				panic(err)
-			}
-			if r == '\n' {
-				state = startOfLine
-			}
-		}
-	}
-	return builder.String()
-}
-
 // eqFoldTemplateFunc is the core implementation of the `eqFold` template
 // function.
 func eqFoldTemplateFunc(first, second string, more ...string) bool {
@@ -143,6 +107,42 @@ func lstatTemplateFunc(name string) any {
 	default:
 		panic(err)
 	}
+}
+
+// prefixLinesTemplateFunc is the core implementation of the `prefixLines`
+// template function.
+func prefixLinesTemplateFunc(prefix, s string) string {
+	type stateType int
+	const (
+		startOfLine stateType = iota
+		inLine
+	)
+
+	state := startOfLine
+	var builder strings.Builder
+	builder.Grow(2 * len(s))
+	for _, r := range s {
+		switch state {
+		case startOfLine:
+			if _, err := builder.WriteString(prefix); err != nil {
+				panic(err)
+			}
+			if _, err := builder.WriteRune(r); err != nil {
+				panic(err)
+			}
+			if r != '\n' {
+				state = inLine
+			}
+		case inLine:
+			if _, err := builder.WriteRune(r); err != nil {
+				panic(err)
+			}
+			if r == '\n' {
+				state = startOfLine
+			}
+		}
+	}
+	return builder.String()
 }
 
 // regexpReplaceAllTemplateFunc is the core implementation of the
