@@ -142,6 +142,16 @@ with *replacement* in *string*.
 far
 ```
 
+## `replaceAll` *old* *new* *string*
+
+`replaceAll` replaces all instances of *old* with *new* in *string*.
+
+```text
+{{ "abcba" | replaceAll "b" "d" }}
+
+adcda
+```
+
 ## `stat` *path*
 
 `stat` returns a map representation of executing

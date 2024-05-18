@@ -43,6 +43,7 @@ func NewFuncMap() template.FuncMap {
 		"prefixLines":      prefixLinesTemplateFunc,
 		"quote":            eachString(strconv.Quote),
 		"regexpReplaceAll": regexpReplaceAllTemplateFunc,
+		"replaceAll":       replaceAllTemplateFunc,
 		"stat":             eachString(statTemplateFunc),
 		"toJSON":           toJSONTemplateFunc,
 		"toLower":          eachString(strings.ToLower),
@@ -143,6 +144,13 @@ func prefixLinesTemplateFunc(prefix, s string) string {
 		}
 	}
 	return builder.String()
+}
+
+// replaceAllTemplateFunc is the `replaceAll` template function.
+func replaceAllTemplateFunc(old, new string, v any) any { //nolint:predeclared
+	return eachString(func(s string) any {
+		return strings.ReplaceAll(s, old, new)
+	})(v)
 }
 
 // regexpReplaceAllTemplateFunc is the core implementation of the
