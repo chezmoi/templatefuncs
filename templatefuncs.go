@@ -8,7 +8,9 @@ import (
 	"io/fs"
 	"os"
 	"os/exec"
+	"reflect"
 	"regexp"
+	"slices"
 	"strconv"
 	"strings"
 	"text/template"
@@ -29,13 +31,16 @@ var fileModeTypeNames = map[fs.FileMode]string{
 // functions.
 func NewFuncMap() template.FuncMap {
 	return template.FuncMap{
+		"compact":          compactTemplateFunc,
 		"contains":         reverseArgs2(strings.Contains),
 		"eqFold":           eqFoldTemplateFunc,
 		"fromJSON":         eachByteSliceErr(fromJSONTemplateFunc),
+		"has":              reverseArgs2(slices.Contains[[]any]),
 		"hasPrefix":        reverseArgs2(strings.HasPrefix),
 		"hasSuffix":        reverseArgs2(strings.HasSuffix),
 		"hexDecode":        eachStringErr(hex.DecodeString),
 		"hexEncode":        eachByteSlice(hex.EncodeToString),
+		"indexOf":          reverseArgs2(slices.Index[[]any]),
 		"join":             reverseArgs2(strings.Join),
 		"list":             listTemplateFunc,
 		"lookPath":         eachStringErr(lookPathTemplateFunc),
@@ -51,6 +56,12 @@ func NewFuncMap() template.FuncMap {
 		"toUpper":          eachString(strings.ToUpper),
 		"trimSpace":        eachString(strings.TrimSpace),
 	}
+}
+
+// compactTemplateFunc is the core implementation of the `compact` template
+// function.
+func compactTemplateFunc(list []any) []any {
+	return slices.DeleteFunc(list, isZeroValue)
 }
 
 // eqFoldTemplateFunc is the core implementation of the `eqFold` template
@@ -374,6 +385,33 @@ func fileInfoToMap(fileInfo fs.FileInfo) map[string]any {
 		"modTime": fileInfo.ModTime().Unix(),
 		"isDir":   fileInfo.IsDir(),
 		"type":    fileModeTypeNames[fileInfo.Mode()&fs.ModeType],
+	}
+}
+
+// isZeroValue returns whether a value is the zero value for its type.
+// An empty array, map or slice is assumed to be a zero value.
+func isZeroValue(v any) bool {
+	vval := reflect.ValueOf(v)
+	if !vval.IsValid() {
+		return true
+	}
+	switch vval.Kind() { //nolint:exhaustive
+	case reflect.Array, reflect.Map, reflect.Slice, reflect.String:
+		return vval.Len() == 0
+	case reflect.Bool:
+		return !vval.Bool()
+	case reflect.Complex64, reflect.Complex128:
+		return vval.Complex() == 0
+	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+		return vval.Int() == 0
+	case reflect.Float32, reflect.Float64:
+		return vval.Float() == 0
+	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64, reflect.Uintptr:
+		return vval.Uint() == 0
+	case reflect.Struct:
+		return false
+	default:
+		return vval.IsNil()
 	}
 }
 

@@ -1,5 +1,15 @@
 # Template Functions
 
+## `compact` *list*
+
+`compact` removes all zero value items from *list*.
+
+```text
+{{ list "one" "" list "three" | compact }}
+
+[one three]
+```
+
 ## `contains` *substring* *string*
 
 `contains` returns whether *substring* is in *string*.
@@ -27,6 +37,16 @@ true
 
 ```text
 {{ `{ "foo": "bar" }` | fromJSON }}
+```
+
+## `has` *item* *list*
+
+`has` returns whether *item* is in *list*.
+
+```text
+{{ list 1 2 3 | has 3 }}
+
+true
 ```
 
 ## `hasPrefix` *prefix* *string*
@@ -67,6 +87,17 @@ foobar
 {{ hexEncode "foobar" }}
 
 666f6f626172
+```
+
+## `indexOf` *item* *list*
+
+`indexOf` returns the index of *item* in *list*, or -1 if *item* is not
+in *list*.
+
+```text
+{{ list "a" "b" "c" | indexOf "b" }}
+
+1
 ```
 
 ## `join` *delimiter* *list*

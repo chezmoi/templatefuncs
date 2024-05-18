@@ -1,6 +1,6 @@
 module github.com/chezmoi/templatefuncs
 
-go 1.19
+go 1.21
 
 require github.com/alecthomas/assert/v2 v2.9.0
 

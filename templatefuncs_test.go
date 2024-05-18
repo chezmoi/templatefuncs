@@ -50,7 +50,10 @@ func TestFuncMap(t *testing.T) {
 		data     any
 		expected string
 	}{
-		{},
+		{
+			template: `{{ list "one" "" list "three" | compact }}`,
+			expected: `[one three]`,
+		},
 		{
 			template: `{{ "abc" | contains "bc" }}`,
 			expected: "true",
@@ -76,6 +79,14 @@ func TestFuncMap(t *testing.T) {
 			expected: "0",
 		},
 		{
+			template: `{{ list 1 2 3 | has 3 }}`,
+			expected: "true",
+		},
+		{
+			template: `{{ has 3 (list 1 2 3) }}`,
+			expected: "true",
+		},
+		{
 			template: `{{ "ab" | hasPrefix "a" }}`,
 			expected: "true",
 		},
@@ -90,6 +101,10 @@ func TestFuncMap(t *testing.T) {
 		{
 			template: `{{ "ab" | hasSuffix "b" }}`,
 			expected: "true",
+		},
+		{
+			template: `{{ list "a" "b" "c" | indexOf "b" }}`,
+			expected: "1",
 		},
 		{
 			template: `{{ list "a" "b" "c" | quote | join "," }}`,
