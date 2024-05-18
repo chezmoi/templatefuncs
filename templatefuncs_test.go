@@ -146,6 +146,10 @@ func TestFuncMap(t *testing.T) {
 			expected: `"a"`,
 		},
 		{
+			template: `{{ list "a" "b" "c" | reverse }}`,
+			expected: "[c b a]",
+		},
+		{
 			template: `{{ (stat "testdata/file").type }}`,
 			expected: "file",
 		},
