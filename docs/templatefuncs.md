@@ -188,9 +188,20 @@ adcda
 `reverse` returns a copy of *list* in reverse order.
 
 ```text
-{{ list "a" "b" "c" }}
+{{ list "a" "b" "c" | reverse }}
 
 [c b a]
+```
+
+## `sort` *list*
+
+`sort` returns *list* sorted in ascending order.
+If *list* cannot be sorted, it is simply returned.
+
+```text
+{{ list list "c" "a" "b" | sort }}
+
+[a b c]
 ```
 
 ## `stat` *path*

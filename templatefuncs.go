@@ -50,6 +50,7 @@ func NewFuncMap() template.FuncMap {
 		"regexpReplaceAll": regexpReplaceAllTemplateFunc,
 		"replaceAll":       replaceAllTemplateFunc,
 		"reverse":          reverseTemplateFunc,
+		"sort":             sortTemplateFunc,
 		"stat":             eachString(statTemplateFunc),
 		"toJSON":           toJSONTemplateFunc,
 		"toLower":          eachString(strings.ToLower),
@@ -177,6 +178,25 @@ func reverseTemplateFunc(list []any) []any {
 	listcopy := append([]any(nil), list...)
 	slices.Reverse(listcopy)
 	return listcopy
+}
+
+// sortTemplateFunc is the core implementation of the `sort` template function.
+func sortTemplateFunc(list []any) []any {
+	strCopy := make([]string, len(list))
+	for i, v := range list {
+		strCopy[i] = toStringTemplateFunc(v)
+	}
+	slices.Sort(strCopy)
+	for i, newValue := range strCopy {
+		for j, v := range list {
+			strv := toStringTemplateFunc(v)
+			if strv == newValue {
+				list[i], list[j] = list[j], list[i]
+				break
+			}
+		}
+	}
+	return list
 }
 
 // statTemplateFunc is the core implementation of the `stat` template function.

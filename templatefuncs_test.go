@@ -134,6 +134,10 @@ func TestFuncMap(t *testing.T) {
 			),
 		},
 		{
+			template: `{{ quote "a" }}`,
+			expected: `"a"`,
+		},
+		{
 			template: `{{ "abcba" | replaceAll "b" "d" }}`,
 			expected: `adcda`,
 		},
@@ -142,12 +146,16 @@ func TestFuncMap(t *testing.T) {
 			expected: "[adc cda]",
 		},
 		{
-			template: `{{ quote "a" }}`,
-			expected: `"a"`,
-		},
-		{
 			template: `{{ list "a" "b" "c" | reverse }}`,
 			expected: "[c b a]",
+		},
+		{
+			template: `{{ list "c" "a" "b" | sort }}`,
+			expected: "[a b c]",
+		},
+		{
+			template: `{{ list 0 4 5 1 | sort }}`,
+			expected: "[0 1 4 5]",
 		},
 		{
 			template: `{{ (stat "testdata/file").type }}`,
