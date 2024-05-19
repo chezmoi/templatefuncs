@@ -1,6 +1,7 @@
 package templatefuncs
 
 import (
+	"cmp"
 	"encoding/hex"
 	"encoding/json"
 	"errors"
@@ -181,8 +182,6 @@ func reverseTemplateFunc(list []any) []any {
 }
 
 // sortTemplateFunc is the core implementation of the `sort` template function.
-//
-//nolint:exhaustive,forcetypeassert,gocognit,gocyclo
 func sortTemplateFunc(list []any) any {
 	if len(list) < 2 {
 		return list
@@ -196,105 +195,35 @@ func sortTemplateFunc(list []any) any {
 		}
 	}
 
-	switch firstElemType.Kind() {
+	switch firstElemType.Kind() { //nolint:exhaustive
 	case reflect.Int:
-		l := make([]int, len(list))
-		for i, elem := range list {
-			l[i] = elem.(int)
-		}
-		slices.Sort(l)
-		return l
+		return convertAndSortSlice[int](list)
 	case reflect.Int8:
-		l := make([]int8, len(list))
-		for i, elem := range list {
-			l[i] = elem.(int8)
-		}
-		slices.Sort(l)
-		return l
+		return convertAndSortSlice[int8](list)
 	case reflect.Int16:
-		l := make([]int16, len(list))
-		for i, elem := range list {
-			l[i] = elem.(int16)
-		}
-		slices.Sort(l)
-		return l
+		return convertAndSortSlice[int16](list)
 	case reflect.Int32:
-		l := make([]int32, len(list))
-		for i, elem := range list {
-			l[i] = elem.(int32)
-		}
-		slices.Sort(l)
-		return l
+		return convertAndSortSlice[int32](list)
 	case reflect.Int64:
-		l := make([]int64, len(list))
-		for i, elem := range list {
-			l[i] = elem.(int64)
-		}
-		slices.Sort(l)
-		return l
+		return convertAndSortSlice[int64](list)
 	case reflect.Uint:
-		l := make([]uint, len(list))
-		for i, elem := range list {
-			l[i] = elem.(uint)
-		}
-		slices.Sort(l)
-		return l
+		return convertAndSortSlice[uint](list)
 	case reflect.Uint8:
-		l := make([]uint8, len(list))
-		for i, elem := range list {
-			l[i] = elem.(uint8)
-		}
-		slices.Sort(l)
-		return l
+		return convertAndSortSlice[uint8](list)
 	case reflect.Uint16:
-		l := make([]uint16, len(list))
-		for i, elem := range list {
-			l[i] = elem.(uint16)
-		}
-		slices.Sort(l)
-		return l
+		return convertAndSortSlice[uint16](list)
 	case reflect.Uint32:
-		l := make([]uint32, len(list))
-		for i, elem := range list {
-			l[i] = elem.(uint32)
-		}
-		slices.Sort(l)
-		return l
+		return convertAndSortSlice[uint32](list)
 	case reflect.Uint64:
-		l := make([]uint64, len(list))
-		for i, elem := range list {
-			l[i] = elem.(uint64)
-		}
-		slices.Sort(l)
-		return l
+		return convertAndSortSlice[uint64](list)
 	case reflect.Uintptr:
-		l := make([]uintptr, len(list))
-		for i, elem := range list {
-			l[i] = elem.(uintptr)
-		}
-		slices.Sort(l)
-		return l
+		return convertAndSortSlice[uintptr](list)
 	case reflect.Float32:
-		l := make([]float32, len(list))
-		for i, elem := range list {
-			l[i] = elem.(float32)
-		}
-		slices.Sort(l)
-		return l
+		return convertAndSortSlice[float32](list)
 	case reflect.Float64:
-		l := make([]float64, len(list))
-		for i, elem := range list {
-			l[i] = elem.(float64)
-		}
-		slices.Sort(l)
-		return l
+		return convertAndSortSlice[float64](list)
 	case reflect.String:
-		l := make([]string, len(list))
-		for i, elem := range list {
-			l[i] = elem.(string)
-		}
-		slices.Sort(l)
-		return l
+		return convertAndSortSlice[string](list)
 	default:
 		return list
 	}
@@ -346,6 +275,20 @@ func toStringTemplateFunc(arg any) string {
 	default:
 		panic(fmt.Sprintf("%T: unsupported type", arg))
 	}
+}
+
+// convertAndSortSlice converts a `[]any` to a `[]T` and sorts it.
+func convertAndSortSlice[T cmp.Ordered](slice []any) []T {
+	l := make([]T, len(slice))
+	for i, elem := range slice {
+		v, ok := elem.(T)
+		if !ok {
+			panic(fmt.Sprintf("unable to convert %v (type %T) to %T", elem, elem, v))
+		}
+		l[i] = v
+	}
+	slices.Sort(l)
+	return l
 }
 
 // eachByteSlice transforms a function that takes a single `[]byte` and returns
