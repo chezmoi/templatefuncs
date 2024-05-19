@@ -195,7 +195,7 @@ adcda
 
 ## `sort` *list*
 
-`sort` returns *list* sorted in ascending order.
+`sort` returns a copy of *list* sorted in ascending order.
 If *list* cannot be sorted, it is simply returned.
 
 ```text

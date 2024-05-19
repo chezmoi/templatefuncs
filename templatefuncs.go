@@ -181,22 +181,123 @@ func reverseTemplateFunc(list []any) []any {
 }
 
 // sortTemplateFunc is the core implementation of the `sort` template function.
-func sortTemplateFunc(list []any) []any {
-	strCopy := make([]string, len(list))
-	for i, v := range list {
-		strCopy[i] = toStringTemplateFunc(v)
+//
+//nolint:exhaustive,forcetypeassert,gocognit,gocyclo
+func sortTemplateFunc(list []any) any {
+	if len(list) < 2 {
+		return list
 	}
-	slices.Sort(strCopy)
-	for i, newValue := range strCopy {
-		for j, v := range list {
-			strv := toStringTemplateFunc(v)
-			if strv == newValue {
-				list[i], list[j] = list[j], list[i]
-				break
-			}
+
+	firstElemType := reflect.TypeOf(list[0])
+
+	for _, elem := range list[1:] {
+		if reflect.TypeOf(elem) != firstElemType {
+			return list
 		}
 	}
-	return list
+
+	switch firstElemType.Kind() {
+	case reflect.Int:
+		l := make([]int, len(list))
+		for i, elem := range list {
+			l[i] = elem.(int)
+		}
+		slices.Sort(l)
+		return l
+	case reflect.Int8:
+		l := make([]int8, len(list))
+		for i, elem := range list {
+			l[i] = elem.(int8)
+		}
+		slices.Sort(l)
+		return l
+	case reflect.Int16:
+		l := make([]int16, len(list))
+		for i, elem := range list {
+			l[i] = elem.(int16)
+		}
+		slices.Sort(l)
+		return l
+	case reflect.Int32:
+		l := make([]int32, len(list))
+		for i, elem := range list {
+			l[i] = elem.(int32)
+		}
+		slices.Sort(l)
+		return l
+	case reflect.Int64:
+		l := make([]int64, len(list))
+		for i, elem := range list {
+			l[i] = elem.(int64)
+		}
+		slices.Sort(l)
+		return l
+	case reflect.Uint:
+		l := make([]uint, len(list))
+		for i, elem := range list {
+			l[i] = elem.(uint)
+		}
+		slices.Sort(l)
+		return l
+	case reflect.Uint8:
+		l := make([]uint8, len(list))
+		for i, elem := range list {
+			l[i] = elem.(uint8)
+		}
+		slices.Sort(l)
+		return l
+	case reflect.Uint16:
+		l := make([]uint16, len(list))
+		for i, elem := range list {
+			l[i] = elem.(uint16)
+		}
+		slices.Sort(l)
+		return l
+	case reflect.Uint32:
+		l := make([]uint32, len(list))
+		for i, elem := range list {
+			l[i] = elem.(uint32)
+		}
+		slices.Sort(l)
+		return l
+	case reflect.Uint64:
+		l := make([]uint64, len(list))
+		for i, elem := range list {
+			l[i] = elem.(uint64)
+		}
+		slices.Sort(l)
+		return l
+	case reflect.Uintptr:
+		l := make([]uintptr, len(list))
+		for i, elem := range list {
+			l[i] = elem.(uintptr)
+		}
+		slices.Sort(l)
+		return l
+	case reflect.Float32:
+		l := make([]float32, len(list))
+		for i, elem := range list {
+			l[i] = elem.(float32)
+		}
+		slices.Sort(l)
+		return l
+	case reflect.Float64:
+		l := make([]float64, len(list))
+		for i, elem := range list {
+			l[i] = elem.(float64)
+		}
+		slices.Sort(l)
+		return l
+	case reflect.String:
+		l := make([]string, len(list))
+		for i, elem := range list {
+			l[i] = elem.(string)
+		}
+		slices.Sort(l)
+		return l
+	default:
+		return list
+	}
 }
 
 // statTemplateFunc is the core implementation of the `stat` template function.
@@ -420,28 +521,33 @@ func fileInfoToMap(fileInfo fs.FileInfo) map[string]any {
 // isZeroValue returns whether a value is the zero value for its type.
 // An empty array, map or slice is assumed to be a zero value.
 func isZeroValue(v any) bool {
-	vval := reflect.ValueOf(v)
-	if !vval.IsValid() {
-		return true
+	truth, ok := template.IsTrue(v)
+	if !ok {
+		panic(fmt.Sprintf("unable to determine zero value for %v", v))
 	}
-	switch vval.Kind() { //nolint:exhaustive
-	case reflect.Array, reflect.Map, reflect.Slice, reflect.String:
-		return vval.Len() == 0
-	case reflect.Bool:
-		return !vval.Bool()
-	case reflect.Complex64, reflect.Complex128:
-		return vval.Complex() == 0
-	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
-		return vval.Int() == 0
-	case reflect.Float32, reflect.Float64:
-		return vval.Float() == 0
-	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64, reflect.Uintptr:
-		return vval.Uint() == 0
-	case reflect.Struct:
-		return false
-	default:
-		return vval.IsNil()
-	}
+	return !truth
+	// vval := reflect.ValueOf(v)
+	// if !vval.IsValid() {
+	// 	return true
+	// }
+	// switch vval.Kind() { //nolint:exhaustive
+	// case reflect.Array, reflect.Map, reflect.Slice, reflect.String:
+	// 	return vval.Len() == 0
+	// case reflect.Bool:
+	// 	return !vval.Bool()
+	// case reflect.Complex64, reflect.Complex128:
+	// 	return vval.Complex() == 0
+	// case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+	// 	return vval.Int() == 0
+	// case reflect.Float32, reflect.Float64:
+	// 	return vval.Float() == 0
+	// case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64, reflect.Uintptr:
+	// 	return vval.Uint() == 0
+	// case reflect.Struct:
+	// 	return false
+	// default:
+	// 	return vval.IsNil()
+	// }
 }
 
 // reverseArgs2 transforms a function that takes two arguments and returns an
