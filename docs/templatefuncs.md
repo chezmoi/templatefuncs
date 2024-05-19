@@ -10,6 +10,16 @@
 [one three]
 ```
 
+## `concat` *list*...
+
+`concat` concatenates *list*s into a new list.
+
+```text
+{{ concat (list 0 1 2) (list "a" "b" "c") }}
+
+[0 1 2 a b c]
+```
+
 ## `contains` *substring* *string*
 
 `contains` returns whether *substring* is in *string*.

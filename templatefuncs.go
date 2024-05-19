@@ -33,6 +33,7 @@ var fileModeTypeNames = map[fs.FileMode]string{
 func NewFuncMap() template.FuncMap {
 	return template.FuncMap{
 		"compact":          compactTemplateFunc,
+		"concat":           slices.Concat[[]any],
 		"contains":         reverseArgs2(strings.Contains),
 		"eqFold":           eqFoldTemplateFunc,
 		"fromJSON":         eachByteSliceErr(fromJSONTemplateFunc),

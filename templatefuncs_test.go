@@ -55,6 +55,10 @@ func TestFuncMap(t *testing.T) {
 			expected: `[one three]`,
 		},
 		{
+			template: `{{ concat (list 0 1 2) (list "a" "b" "c") }}`,
+			expected: "[0 1 2 a b c]",
+		},
+		{
 			template: `{{ "abc" | contains "bc" }}`,
 			expected: "true",
 		},
