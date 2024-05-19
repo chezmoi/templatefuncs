@@ -58,6 +58,7 @@ func NewFuncMap() template.FuncMap {
 		"toString":         toStringTemplateFunc,
 		"toUpper":          eachString(strings.ToUpper),
 		"trimSpace":        eachString(strings.TrimSpace),
+		"uniq":             uniqTemplateFunc,
 	}
 }
 
@@ -277,7 +278,22 @@ func toStringTemplateFunc(arg any) string {
 	}
 }
 
-// convertAndSortSlice converts a `[]any` to a `[]T` and sorts it.
+// uniqTemplateFunc is the core implementation of the `uniq` template function.
+func uniqTemplateFunc(list []any) []any {
+	seen := make(map[any]struct{})
+	result := []any{}
+
+	for _, v := range list {
+		if _, ok := seen[v]; !ok {
+			result = append(result, v)
+			seen[v] = struct{}{}
+		}
+	}
+
+	return result
+}
+
+// convertAndSortSlice creates a `[]T` copy of its input and sorts it.
 func convertAndSortSlice[T cmp.Ordered](slice []any) []T {
 	l := make([]T, len(slice))
 	for i, elem := range slice {

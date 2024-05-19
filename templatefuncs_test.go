@@ -169,6 +169,10 @@ func TestFuncMap(t *testing.T) {
 			template: `{{ trimSpace " a " }}`,
 			expected: "a",
 		},
+		{
+			template: `{{ list 1 2 1 3 3 2 1 2 | uniq }}`,
+			expected: "[1 2 3]",
+		},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			tmpl, err := template.New("").Funcs(funcMap).Parse(tc.template)

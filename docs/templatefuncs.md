@@ -262,3 +262,13 @@ FOOBAR
 
 foobar
 ```
+
+## `uniq` *list*
+
+`uniq` returns a new list containing only unique elements in *list*.
+
+```text
+{{ list 1 2 1 3 3 2 1 2 | uniq }}
+
+[1 2 3]
+```
