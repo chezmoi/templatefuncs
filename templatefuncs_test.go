@@ -9,6 +9,14 @@ import (
 	"github.com/alecthomas/assert/v2"
 )
 
+var (
+	strSlice       = []string{"", "a", "b", "c"}
+	intSlice       = []int{0, 1, 2, 3}
+	mixedSlice     = []any{map[string]any{}, "a", 1, []string{}, 7.7}
+	emptySlice     = []any{}
+	zeroValueSlice = []int{0, 0, 0, 0}
+)
+
 func TestEachString(t *testing.T) {
 	for i, tc := range []struct {
 		f        func(string) string
@@ -51,12 +59,29 @@ func TestFuncMap(t *testing.T) {
 		expected string
 	}{
 		{
-			template: `{{ list "one" "" list "three" | compact }}`,
-			expected: `[one three]`,
+			template: `{{ . | compact }}`,
+			data:     strSlice,
+			expected: `[a b c]`,
 		},
 		{
-			template: `{{ concat (list 0 1 2) (list "a" "b" "c") }}`,
-			expected: "[0 1 2 a b c]",
+			template: `{{ . | compact }}`,
+			data:     intSlice,
+			expected: `[1 2 3]`,
+		},
+		{
+			template: `{{ . | compact }}`,
+			data:     mixedSlice,
+			expected: `[a 1 7.7]`,
+		},
+		{
+			template: `{{ . | compact }}`,
+			data:     emptySlice,
+			expected: "[]",
+		},
+		{
+			template: `{{ . | compact }}`,
+			data:     zeroValueSlice,
+			expected: "[]",
 		},
 		{
 			template: `{{ "abc" | contains "bc" }}`,
@@ -83,14 +108,6 @@ func TestFuncMap(t *testing.T) {
 			expected: "0",
 		},
 		{
-			template: `{{ list 1 2 3 | has 3 }}`,
-			expected: "true",
-		},
-		{
-			template: `{{ has 3 (list 1 2 3) }}`,
-			expected: "true",
-		},
-		{
 			template: `{{ "ab" | hasPrefix "a" }}`,
 			expected: "true",
 		},
@@ -105,10 +122,6 @@ func TestFuncMap(t *testing.T) {
 		{
 			template: `{{ "ab" | hasSuffix "b" }}`,
 			expected: "true",
-		},
-		{
-			template: `{{ list "a" "b" "c" | indexOf "b" }}`,
-			expected: "1",
 		},
 		{
 			template: `{{ list "a" "b" "c" | quote | join "," }}`,
@@ -150,18 +163,6 @@ func TestFuncMap(t *testing.T) {
 			expected: "[adc cda]",
 		},
 		{
-			template: `{{ list "a" "b" "c" | reverse }}`,
-			expected: "[c b a]",
-		},
-		{
-			template: `{{ list "c" "a" "b" | sort }}`,
-			expected: "[a b c]",
-		},
-		{
-			template: `{{ list 0 4 5 1 | sort }}`,
-			expected: "[0 1 4 5]",
-		},
-		{
 			template: `{{ (stat "testdata/file").type }}`,
 			expected: "file",
 		},
@@ -172,10 +173,6 @@ func TestFuncMap(t *testing.T) {
 		{
 			template: `{{ trimSpace " a " }}`,
 			expected: "a",
-		},
-		{
-			template: `{{ list 1 2 1 3 3 2 1 2 | uniq }}`,
-			expected: "[1 2 3]",
 		},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {

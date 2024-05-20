@@ -104,6 +104,8 @@ linters:
   - wsl
 
 linters-settings:
+  exhaustive:
+    default-signifies-exhaustive: true
   gci:
     sections:
     - standard

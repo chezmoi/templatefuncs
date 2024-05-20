@@ -10,16 +10,6 @@
 [one three]
 ```
 
-## `concat` *list*...
-
-`concat` concatenates *list*s into a new list.
-
-```text
-{{ concat (list 0 1 2) (list "a" "b" "c") }}
-
-[0 1 2 a b c]
-```
-
 ## `contains` *substring* *string*
 
 `contains` returns whether *substring* is in *string*.
@@ -47,16 +37,6 @@ true
 
 ```text
 {{ `{ "foo": "bar" }` | fromJSON }}
-```
-
-## `has` *item* *list*
-
-`has` returns whether *item* is in *list*.
-
-```text
-{{ list 1 2 3 | has 3 }}
-
-true
 ```
 
 ## `hasPrefix` *prefix* *string*
@@ -97,17 +77,6 @@ foobar
 {{ hexEncode "foobar" }}
 
 666f6f626172
-```
-
-## `indexOf` *item* *list*
-
-`indexOf` returns the index of *item* in *list*, or -1 if *item* is not
-in *list*.
-
-```text
-{{ list "a" "b" "c" | indexOf "b" }}
-
-1
 ```
 
 ## `join` *delimiter* *list*
@@ -193,27 +162,6 @@ far
 adcda
 ```
 
-## `reverse` *list*
-
-`reverse` returns a copy of *list* in reverse order.
-
-```text
-{{ list "a" "b" "c" | reverse }}
-
-[c b a]
-```
-
-## `sort` *list*
-
-`sort` returns a copy of *list* sorted in ascending order.
-If *list* cannot be sorted, it is simply returned.
-
-```text
-{{ list list "c" "a" "b" | sort }}
-
-[a b c]
-```
-
 ## `stat` *path*
 
 `stat` returns a map representation of executing
@@ -271,14 +219,4 @@ FOOBAR
 {{ "    foobar    " | trimSpace }}
 
 foobar
-```
-
-## `uniq` *list*
-
-`uniq` returns a new list containing only unique elements in *list*.
-
-```text
-{{ list 1 2 1 3 3 2 1 2 | uniq }}
-
-[1 2 3]
 ```

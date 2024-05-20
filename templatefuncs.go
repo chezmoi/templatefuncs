@@ -1,7 +1,6 @@
 package templatefuncs
 
 import (
-	"cmp"
 	"encoding/hex"
 	"encoding/json"
 	"errors"
@@ -11,7 +10,6 @@ import (
 	"os/exec"
 	"reflect"
 	"regexp"
-	"slices"
 	"strconv"
 	"strings"
 	"text/template"
@@ -33,16 +31,13 @@ var fileModeTypeNames = map[fs.FileMode]string{
 func NewFuncMap() template.FuncMap {
 	return template.FuncMap{
 		"compact":          compactTemplateFunc,
-		"concat":           slices.Concat[[]any],
 		"contains":         reverseArgs2(strings.Contains),
 		"eqFold":           eqFoldTemplateFunc,
 		"fromJSON":         eachByteSliceErr(fromJSONTemplateFunc),
-		"has":              reverseArgs2(slices.Contains[[]any]),
 		"hasPrefix":        reverseArgs2(strings.HasPrefix),
 		"hasSuffix":        reverseArgs2(strings.HasSuffix),
 		"hexDecode":        eachStringErr(hex.DecodeString),
 		"hexEncode":        eachByteSlice(hex.EncodeToString),
-		"indexOf":          reverseArgs2(slices.Index[[]any]),
 		"join":             reverseArgs2(strings.Join),
 		"list":             listTemplateFunc,
 		"lookPath":         eachStringErr(lookPathTemplateFunc),
@@ -51,22 +46,30 @@ func NewFuncMap() template.FuncMap {
 		"quote":            eachString(strconv.Quote),
 		"regexpReplaceAll": regexpReplaceAllTemplateFunc,
 		"replaceAll":       replaceAllTemplateFunc,
-		"reverse":          reverseTemplateFunc,
-		"sort":             sortTemplateFunc,
 		"stat":             eachString(statTemplateFunc),
 		"toJSON":           toJSONTemplateFunc,
 		"toLower":          eachString(strings.ToLower),
 		"toString":         toStringTemplateFunc,
 		"toUpper":          eachString(strings.ToUpper),
 		"trimSpace":        eachString(strings.TrimSpace),
-		"uniq":             uniqTemplateFunc,
 	}
 }
 
 // compactTemplateFunc is the core implementation of the `compact` template
 // function.
-func compactTemplateFunc(list []any) []any {
-	return slices.DeleteFunc(list, isZeroValue)
+func compactTemplateFunc(list any) any {
+	v := reflect.ValueOf(list)
+	if v.Kind() != reflect.Slice {
+		panic(fmt.Sprintf("unable to compact argument of type %T", list))
+	}
+	result := reflect.MakeSlice(v.Type(), 0, v.Len())
+	for i := 0; i < v.Len(); i++ {
+		elem := v.Index(i)
+		if !isZeroValue(elem.Interface()) {
+			result = reflect.Append(result, elem)
+		}
+	}
+	return result.Interface()
 }
 
 // eqFoldTemplateFunc is the core implementation of the `eqFold` template
@@ -175,62 +178,6 @@ func regexpReplaceAllTemplateFunc(expr, repl, s string) string {
 	return regexp.MustCompile(expr).ReplaceAllString(s, repl)
 }
 
-// reverseTemplateFunc is the core implementation of the `reverse`
-// template function.
-func reverseTemplateFunc(list []any) []any {
-	listcopy := append([]any(nil), list...)
-	slices.Reverse(listcopy)
-	return listcopy
-}
-
-// sortTemplateFunc is the core implementation of the `sort` template function.
-func sortTemplateFunc(list []any) any {
-	if len(list) < 2 {
-		return list
-	}
-
-	firstElemType := reflect.TypeOf(list[0])
-
-	for _, elem := range list[1:] {
-		if reflect.TypeOf(elem) != firstElemType {
-			return list
-		}
-	}
-
-	switch firstElemType.Kind() { //nolint:exhaustive
-	case reflect.Int:
-		return convertAndSortSlice[int](list)
-	case reflect.Int8:
-		return convertAndSortSlice[int8](list)
-	case reflect.Int16:
-		return convertAndSortSlice[int16](list)
-	case reflect.Int32:
-		return convertAndSortSlice[int32](list)
-	case reflect.Int64:
-		return convertAndSortSlice[int64](list)
-	case reflect.Uint:
-		return convertAndSortSlice[uint](list)
-	case reflect.Uint8:
-		return convertAndSortSlice[uint8](list)
-	case reflect.Uint16:
-		return convertAndSortSlice[uint16](list)
-	case reflect.Uint32:
-		return convertAndSortSlice[uint32](list)
-	case reflect.Uint64:
-		return convertAndSortSlice[uint64](list)
-	case reflect.Uintptr:
-		return convertAndSortSlice[uintptr](list)
-	case reflect.Float32:
-		return convertAndSortSlice[float32](list)
-	case reflect.Float64:
-		return convertAndSortSlice[float64](list)
-	case reflect.String:
-		return convertAndSortSlice[string](list)
-	default:
-		return list
-	}
-}
-
 // statTemplateFunc is the core implementation of the `stat` template function.
 func statTemplateFunc(name string) any {
 	switch fileInfo, err := os.Stat(name); {
@@ -277,35 +224,6 @@ func toStringTemplateFunc(arg any) string {
 	default:
 		panic(fmt.Sprintf("%T: unsupported type", arg))
 	}
-}
-
-// uniqTemplateFunc is the core implementation of the `uniq` template function.
-func uniqTemplateFunc(list []any) []any {
-	seen := make(map[any]struct{})
-	result := []any{}
-
-	for _, v := range list {
-		if _, ok := seen[v]; !ok {
-			result = append(result, v)
-			seen[v] = struct{}{}
-		}
-	}
-
-	return result
-}
-
-// convertAndSortSlice creates a `[]T` copy of its input and sorts it.
-func convertAndSortSlice[T cmp.Ordered](slice []any) []T {
-	l := make([]T, len(slice))
-	for i, elem := range slice {
-		v, ok := elem.(T)
-		if !ok {
-			panic(fmt.Sprintf("unable to convert %v (type %T) to %T", elem, elem, v))
-		}
-		l[i] = v
-	}
-	slices.Sort(l)
-	return l
 }
 
 // eachByteSlice transforms a function that takes a single `[]byte` and returns
@@ -483,31 +401,9 @@ func fileInfoToMap(fileInfo fs.FileInfo) map[string]any {
 func isZeroValue(v any) bool {
 	truth, ok := template.IsTrue(v)
 	if !ok {
-		panic(fmt.Sprintf("unable to determine zero value for %v", v))
+		panic(fmt.Sprintf("unable to determine zero value for %v (type %T)", v, v))
 	}
 	return !truth
-	// vval := reflect.ValueOf(v)
-	// if !vval.IsValid() {
-	// 	return true
-	// }
-	// switch vval.Kind() { //nolint:exhaustive
-	// case reflect.Array, reflect.Map, reflect.Slice, reflect.String:
-	// 	return vval.Len() == 0
-	// case reflect.Bool:
-	// 	return !vval.Bool()
-	// case reflect.Complex64, reflect.Complex128:
-	// 	return vval.Complex() == 0
-	// case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
-	// 	return vval.Int() == 0
-	// case reflect.Float32, reflect.Float64:
-	// 	return vval.Float() == 0
-	// case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64, reflect.Uintptr:
-	// 	return vval.Uint() == 0
-	// case reflect.Struct:
-	// 	return false
-	// default:
-	// 	return vval.IsNil()
-	// }
 }
 
 // reverseArgs2 transforms a function that takes two arguments and returns an
