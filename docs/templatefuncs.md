@@ -162,6 +162,16 @@ far
 adcda
 ```
 
+## `reverse` *list*
+
+`reverse` returns a copy of *list* with its elements in reverse order.
+
+```text
+{{ list 1 2 3 | reverse }}
+
+[3 2 1]
+```
+
 ## `stat` *path*
 
 `stat` returns a map representation of executing

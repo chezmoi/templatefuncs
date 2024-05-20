@@ -9,14 +9,6 @@ import (
 	"github.com/alecthomas/assert/v2"
 )
 
-var (
-	strSlice       = []string{"", "a", "b", "c"}
-	intSlice       = []int{0, 1, 2, 3}
-	mixedSlice     = []any{map[string]any{}, "a", 1, []string{}, 7.7}
-	emptySlice     = []any{}
-	zeroValueSlice = []int{0, 0, 0, 0}
-)
-
 func TestEachString(t *testing.T) {
 	for i, tc := range []struct {
 		f        func(string) string
@@ -59,28 +51,37 @@ func TestFuncMap(t *testing.T) {
 		expected string
 	}{
 		{
-			template: `{{ . | compact }}`,
-			data:     strSlice,
-			expected: `[a b c]`,
+			template: `{{ . | compact | printf "%[1]v\n%[1]T\n" }}`,
+			data:     []string{"", "a", "", "b", "c"},
+			expected: joinLines(
+				"[a b c]",
+				"[]string",
+			),
+		},
+		{
+			template: `{{ . | compact | printf "%[1]v\n%[1]T\n" }}`,
+			data:     []int{0, 1, 0, 2, 3},
+			expected: joinLines(
+				"[1 2 3]",
+				"[]int",
+			),
+		},
+		{
+			template: `{{ . | compact | printf "%[1]v\n%[1]T\n" }}`,
+			data:     []any{map[string]any{}, "a", 1, []string{}, 7.7},
+			expected: joinLines(
+				"[a 1 7.7]",
+				"[]interface {}",
+			),
 		},
 		{
 			template: `{{ . | compact }}`,
-			data:     intSlice,
-			expected: `[1 2 3]`,
-		},
-		{
-			template: `{{ . | compact }}`,
-			data:     mixedSlice,
-			expected: `[a 1 7.7]`,
-		},
-		{
-			template: `{{ . | compact }}`,
-			data:     emptySlice,
+			data:     []any{},
 			expected: "[]",
 		},
 		{
 			template: `{{ . | compact }}`,
-			data:     zeroValueSlice,
+			data:     []int{0, 0, 0, 0},
 			expected: "[]",
 		},
 		{
@@ -161,6 +162,22 @@ func TestFuncMap(t *testing.T) {
 		{
 			template: `{{ list "abc" "cba" | replaceAll "b" "d" }}`,
 			expected: "[adc cda]",
+		},
+		{
+			template: `{{ . | reverse | printf "%[1]v\n%[1]T\n" }}`,
+			data:     []string{"a", "b", "c"},
+			expected: joinLines(
+				"[c b a]",
+				"[]string",
+			),
+		},
+		{
+			template: `{{ . | reverse | printf "%[1]v\n%[1]T\n" }}`,
+			data:     []int{1, 2, 3},
+			expected: joinLines(
+				"[3 2 1]",
+				"[]int",
+			),
 		},
 		{
 			template: `{{ (stat "testdata/file").type }}`,

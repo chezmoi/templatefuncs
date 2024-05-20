@@ -46,6 +46,7 @@ func NewFuncMap() template.FuncMap {
 		"quote":            eachString(strconv.Quote),
 		"regexpReplaceAll": regexpReplaceAllTemplateFunc,
 		"replaceAll":       replaceAllTemplateFunc,
+		"reverse":          reverseTemplateFunc,
 		"stat":             eachString(statTemplateFunc),
 		"toJSON":           toJSONTemplateFunc,
 		"toLower":          eachString(strings.ToLower),
@@ -176,6 +177,23 @@ func replaceAllTemplateFunc(old, new string, v any) any { //nolint:predeclared
 // `regexpReplaceAll` template function.
 func regexpReplaceAllTemplateFunc(expr, repl, s string) string {
 	return regexp.MustCompile(expr).ReplaceAllString(s, repl)
+}
+
+// reverseTemplateFunc is the core implementation of the `reverse`
+// template function.
+func reverseTemplateFunc(list any) any {
+	v := reflect.ValueOf(list)
+	if v.Kind() != reflect.Slice {
+		panic(fmt.Sprintf("unable to reverse argument of type %T", list))
+	}
+	if v.Len() <= 1 {
+		return list
+	}
+	result := reflect.MakeSlice(v.Type(), 0, v.Len())
+	for i := v.Len() - 1; i >= 0; i-- {
+		result = reflect.Append(result, v.Index(i))
+	}
+	return result.Interface()
 }
 
 // statTemplateFunc is the core implementation of the `stat` template function.
