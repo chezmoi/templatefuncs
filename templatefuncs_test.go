@@ -50,7 +50,40 @@ func TestFuncMap(t *testing.T) {
 		data     any
 		expected string
 	}{
-		{},
+		{
+			template: `{{ . | compact | printf "%[1]v\n%[1]T\n" }}`,
+			data:     []string{"", "a", "", "b", "c"},
+			expected: joinLines(
+				"[a b c]",
+				"[]string",
+			),
+		},
+		{
+			template: `{{ . | compact | printf "%[1]v\n%[1]T\n" }}`,
+			data:     []int{0, 1, 0, 2, 3},
+			expected: joinLines(
+				"[1 2 3]",
+				"[]int",
+			),
+		},
+		{
+			template: `{{ . | compact | printf "%[1]v\n%[1]T\n" }}`,
+			data:     []any{map[string]any{}, "a", 1, []string{}, 7.7},
+			expected: joinLines(
+				"[a 1 7.7]",
+				"[]interface {}",
+			),
+		},
+		{
+			template: `{{ . | compact }}`,
+			data:     []any{},
+			expected: "[]",
+		},
+		{
+			template: `{{ . | compact }}`,
+			data:     []int{0, 0, 0, 0},
+			expected: "[]",
+		},
 		{
 			template: `{{ "abc" | contains "bc" }}`,
 			expected: "true",
@@ -119,6 +152,10 @@ func TestFuncMap(t *testing.T) {
 			),
 		},
 		{
+			template: `{{ quote "a" }}`,
+			expected: `"a"`,
+		},
+		{
 			template: `{{ "abcba" | replaceAll "b" "d" }}`,
 			expected: `adcda`,
 		},
@@ -127,8 +164,20 @@ func TestFuncMap(t *testing.T) {
 			expected: "[adc cda]",
 		},
 		{
-			template: `{{ quote "a" }}`,
-			expected: `"a"`,
+			template: `{{ . | reverse | printf "%[1]v\n%[1]T\n" }}`,
+			data:     []string{"a", "b", "c"},
+			expected: joinLines(
+				"[c b a]",
+				"[]string",
+			),
+		},
+		{
+			template: `{{ . | reverse | printf "%[1]v\n%[1]T\n" }}`,
+			data:     []int{1, 2, 3},
+			expected: joinLines(
+				"[3 2 1]",
+				"[]int",
+			),
 		},
 		{
 			template: `{{ (stat "testdata/file").type }}`,

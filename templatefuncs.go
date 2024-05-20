@@ -8,6 +8,7 @@ import (
 	"io/fs"
 	"os"
 	"os/exec"
+	"reflect"
 	"regexp"
 	"strconv"
 	"strings"
@@ -29,6 +30,7 @@ var fileModeTypeNames = map[fs.FileMode]string{
 // functions.
 func NewFuncMap() template.FuncMap {
 	return template.FuncMap{
+		"compact":          compactTemplateFunc,
 		"contains":         reverseArgs2(strings.Contains),
 		"eqFold":           eqFoldTemplateFunc,
 		"fromJSON":         eachByteSliceErr(fromJSONTemplateFunc),
@@ -44,6 +46,7 @@ func NewFuncMap() template.FuncMap {
 		"quote":            eachString(strconv.Quote),
 		"regexpReplaceAll": regexpReplaceAllTemplateFunc,
 		"replaceAll":       replaceAllTemplateFunc,
+		"reverse":          reverseTemplateFunc,
 		"stat":             eachString(statTemplateFunc),
 		"toJSON":           toJSONTemplateFunc,
 		"toLower":          eachString(strings.ToLower),
@@ -51,6 +54,23 @@ func NewFuncMap() template.FuncMap {
 		"toUpper":          eachString(strings.ToUpper),
 		"trimSpace":        eachString(strings.TrimSpace),
 	}
+}
+
+// compactTemplateFunc is the core implementation of the `compact` template
+// function.
+func compactTemplateFunc(list any) any {
+	v := reflect.ValueOf(list)
+	if v.Kind() != reflect.Slice {
+		panic(fmt.Sprintf("unable to compact argument of type %T", list))
+	}
+	result := reflect.MakeSlice(v.Type(), 0, v.Len())
+	for i := 0; i < v.Len(); i++ {
+		elem := v.Index(i)
+		if !isZeroValue(elem.Interface()) {
+			result = reflect.Append(result, elem)
+		}
+	}
+	return result.Interface()
 }
 
 // eqFoldTemplateFunc is the core implementation of the `eqFold` template
@@ -157,6 +177,23 @@ func replaceAllTemplateFunc(old, new string, v any) any { //nolint:predeclared
 // `regexpReplaceAll` template function.
 func regexpReplaceAllTemplateFunc(expr, repl, s string) string {
 	return regexp.MustCompile(expr).ReplaceAllString(s, repl)
+}
+
+// reverseTemplateFunc is the core implementation of the `reverse`
+// template function.
+func reverseTemplateFunc(list any) any {
+	v := reflect.ValueOf(list)
+	if v.Kind() != reflect.Slice {
+		panic(fmt.Sprintf("unable to reverse argument of type %T", list))
+	}
+	if v.Len() <= 1 {
+		return list
+	}
+	result := reflect.MakeSlice(v.Type(), 0, v.Len())
+	for i := v.Len() - 1; i >= 0; i-- {
+		result = reflect.Append(result, v.Index(i))
+	}
+	return result.Interface()
 }
 
 // statTemplateFunc is the core implementation of the `stat` template function.
@@ -375,6 +412,16 @@ func fileInfoToMap(fileInfo fs.FileInfo) map[string]any {
 		"isDir":   fileInfo.IsDir(),
 		"type":    fileModeTypeNames[fileInfo.Mode()&fs.ModeType],
 	}
+}
+
+// isZeroValue returns whether a value is the zero value for its type.
+// An empty array, map or slice is assumed to be a zero value.
+func isZeroValue(v any) bool {
+	truth, ok := template.IsTrue(v)
+	if !ok {
+		panic(fmt.Sprintf("unable to determine zero value for %v (type %T)", v, v))
+	}
+	return !truth
 }
 
 // reverseArgs2 transforms a function that takes two arguments and returns an

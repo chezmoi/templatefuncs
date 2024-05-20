@@ -1,5 +1,15 @@
 # Template Functions
 
+## `compact` *list*
+
+`compact` removes all zero value items from *list*.
+
+```text
+{{ list "one" "" list "three" | compact }}
+
+[one three]
+```
+
 ## `contains` *substring* *string*
 
 `contains` returns whether *substring* is in *string*.
@@ -150,6 +160,16 @@ far
 {{ "abcba" | replaceAll "b" "d" }}
 
 adcda
+```
+
+## `reverse` *list*
+
+`reverse` returns a copy of *list* with its elements in reverse order.
+
+```text
+{{ list 1 2 3 | reverse }}
+
+[3 2 1]
 ```
 
 ## `stat` *path*
